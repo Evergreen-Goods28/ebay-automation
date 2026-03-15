@@ -84,7 +84,7 @@ export default async function handler(req, res) {
 }
 
 async function identifyProduct(frontPhoto, backPhoto, topPhoto) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
   const prompt = `Analyze these product photos and extract ALL visible information.
 
@@ -135,7 +135,7 @@ Return ONLY valid JSON (no markdown, no backticks):
 }
 
 async function generateListing(productData) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
   const prompt = `Generate eBay listing fields for this product.
 
