@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "env": {
+    "SUPABASE_URL": "https://ypwmrcerqexqgnpgrfph.supabase.co",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwd21yY2VycWV4cWducGdyZnBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY5NzY1NzgsImV4cCI6MjA1MjU1MjU3OH0.4NTs3EDX9hVhVh69CN739A_Q2wPOcJXyH6P_example",
+    "GEMINI_API_KEY": "AIzaSyBNpWo73bfOGCELWLIozGG-LvP6qOkdU7Q"
+  }
+}
