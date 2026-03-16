@@ -34,7 +34,7 @@ export default async function handler(req, res) {
 
   // Test Gemini API
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
     const result = await model.generateContent('Say "test successful" in JSON format');
     const response = await result.response;
     const text = response.text();
