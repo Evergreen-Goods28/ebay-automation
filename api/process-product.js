@@ -1,15 +1,13 @@
 // api/process-product.js
-// Vercel Serverless Function
-
 import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const supabase = createClient(
-  'https://ypwmrcerqexqgnpgrfph.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwd21yY2VycWV4cWducGdyZnBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY5NzY1NzgsImV4cCI6MjA1MjU1MjU3OH0.4NTs3EDX9hVhVh69CN739A_Q2wPOcJXyH6P_example'
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
 );
 
-const genAI = new GoogleGenerativeAI('AIzaSyBNpWo73bfOGCELWLIozGG-LvP6qOkdU7Q');
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -19,20 +17,16 @@ export default async function handler(req, res) {
   try {
     const { frontPhoto, backPhoto, topPhoto, notes } = req.body;
 
-    // Step 1: Identify product with Gemini Vision
     console.log('Step 1: Identifying product with Gemini...');
     const productData = await identifyProduct(frontPhoto, backPhoto, topPhoto);
 
-    // Step 2: Generate eBay listing data
     console.log('Step 2: Generating eBay listing...');
     const listingData = await generateListing(productData);
 
-    // Step 3: Save to Supabase
     console.log('Step 3: Saving to database...');
     const { data: product, error: dbError } = await supabase
       .from('products')
       .insert([{
-        // AI extracted data
         brand: productData.brand,
         product_name: productData.product_name,
         variant: productData.variant,
@@ -40,23 +34,15 @@ export default async function handler(req, res) {
         product_type: productData.product_type,
         upc: productData.upc,
         confidence_score: productData.confidence_score,
-        
-        // eBay listing
         title: listingData.title,
         category_id: listingData.category_id,
         condition: listingData.condition,
         description: listingData.description,
         price: listingData.suggested_price,
-        
-        // Photos
         photo_front_url: frontPhoto,
         photo_back_url: backPhoto,
         photo_top_url: topPhoto,
-        
-        // Notes
         damage_notes: notes,
-        
-        // Status
         status: 'ready'
       }])
       .select()
@@ -64,7 +50,6 @@ export default async function handler(req, res) {
 
     if (dbError) throw dbError;
 
-    // Step 4: Trigger image scraping (async, don't wait)
     fetch(`${req.headers.origin}/api/scrape-images`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -84,7 +69,7 @@ export default async function handler(req, res) {
 }
 
 async function identifyProduct(frontPhoto, backPhoto, topPhoto) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const prompt = `Analyze these product photos and extract ALL visible information.
 
@@ -123,7 +108,6 @@ Return ONLY valid JSON (no markdown, no backticks):
   const response = await result.response;
   const text = response.text();
   
-  // Clean response
   let cleanText = text.trim();
   if (cleanText.startsWith('```')) {
     const lines = cleanText.split('\n');
@@ -135,7 +119,7 @@ Return ONLY valid JSON (no markdown, no backticks):
 }
 
 async function generateListing(productData) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const prompt = `Generate eBay listing fields for this product.
 
